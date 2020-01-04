@@ -130,7 +130,8 @@ class LiteEthICMPEcho(Module):
         # # #
 
         # TODO: optimize ressources (no need to store parameters as datas)
-        self.submodules.buffer = stream.SyncFIFO(eth_icmp_user_description(dw), 128//(dw//8), buffered=True)
+        self.submodules.buffer = stream.BufferizeEndpoints({"source": stream.DIR_SOURCE, "sink": stream.DIR_SINK})(
+                stream.SyncFIFO(eth_icmp_user_description(dw), 128//(dw//8), buffered=True))
         self.comb += [
             sink.connect(self.buffer.sink),
             self.buffer.source.connect(source),

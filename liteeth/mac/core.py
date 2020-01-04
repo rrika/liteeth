@@ -106,8 +106,13 @@ class LiteEthMACCore(Module, AutoCSR):
         self.submodules += ClockDomainsRenamer({"write": "sys", "read": "eth_tx"})(tx_cdc)
         self.submodules += ClockDomainsRenamer({"write": "eth_rx", "read": "sys"})(rx_cdc)
 
-        tx_pipeline += [tx_cdc]
-        rx_pipeline += [rx_cdc]
+        tx_cdc_buffer = stream.Buffer(eth_phy_description(dw))
+        rx_cdc_buffer = stream.Buffer(eth_phy_description(dw))
+        self.submodules += tx_cdc_buffer
+        self.submodules += rx_cdc_buffer
+
+        tx_pipeline += [tx_cdc, tx_cdc_buffer]
+        rx_pipeline += [rx_cdc, rx_cdc_buffer]
 
         # Graph
         self.submodules.tx_pipeline = stream.Pipeline(*reversed(tx_pipeline))
